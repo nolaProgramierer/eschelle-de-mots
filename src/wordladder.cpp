@@ -2,8 +2,8 @@
  * This program constructs a word ladder from
  * one word to another formed by changing one
  * letter at a time with the constraints that
- * at each step the sequence of lettrers still
- * forms a vlid word.
+ * at each step the sequence of letters still
+ * forms a valid word.
  * Based on Stanford CS 106B assignment
  * Glenn Langdon
  */
@@ -21,11 +21,16 @@ using namespace std;
  * Function prototypes
  */
 bool wordChecker(string w1, string w2, Lexicon lex);
+bool isInDictionary(string word, Lexicon dict);
+string resetWord(char ch, string tempStr, string origStr, size_t i);
 
 int main() {
     cout << "Please give me two English words, and I will convert the" << endl;
     cout << "first into the second by modifying one letter at a time." << endl;
 
+
+    string testWord = "cart";
+    cout << testWord.substr(0, 2) + testWord.at(2) + testWord.substr(3) << endl;
     ifstream stream;
     promptUserForFile(stream, "Dictionary file name:", "Dictionary not found, "
                                                        "Please enter a valid dictionary.\n");
@@ -39,7 +44,16 @@ int main() {
             break;
         }
        else if (wordChecker(w1, w2, lex)) {
-           // make word ladder
+           string temp = w1;
+           for (size_t i = 0; i < w1.length(); i++) {
+                for (char ltr = 'a'; ltr <= 'z'; ltr++) {
+                   temp.at(i) = ltr;
+                   cout <<  temp.substr(0, i) + temp.at(i) + temp.substr(i + 1) << endl;
+                   if (ltr == 'z') {
+                       temp.at(i) = w1.at(i);
+                   }
+               }
+           }
        }
     }
 
@@ -68,4 +82,25 @@ bool wordChecker(string word1, string word2, Lexicon lex) {
         return false;
     }
     return true;
+}
+
+/*
+ * If generated word is in the dictionary, return true
+ */
+bool isInDictionary(string word, Lexicon dict) {
+    if (!dict.contains(word)) {
+        return false;
+    }
+    return true;
+}
+
+/*
+ * When word index reachs end of alphabet, 'z',
+ * reset index to original letter
+ */
+string resetWord(char ch, string tempStr, string origStr, size_t i) {
+    if (ch == 'z') {
+        tempStr.at(i) = origStr.at(i);
+    }
+    return tempStr;
 }
