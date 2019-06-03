@@ -22,8 +22,9 @@ using namespace std;
  */
 bool wordChecker(string w1, string w2, Lexicon lex);
 bool isInDictionary(string word, Lexicon dict);
-Queue<Stack<string>> makeQueue(string w1, string w2, Queue<Stack<string>> q);
-
+Vector<string> findLadderWords(Vector<string> vec, Lexicon lex, string w1);
+Vector<string> findAllCombinations(string w1);
+Queue<Stack<string>> makeLadderQueue(Vector<string> vec, string w1);
 
 int main() {
     cout << "Please give me two English words, and I will convert the" << endl;
@@ -45,27 +46,69 @@ int main() {
             break;
         }
         else if (wordChecker(w1, w2, lex)) {
-            string temp = w1;
-            Queue<Stack<string>> stackQueue;
-            for (size_t i = 0; i < w1.length(); i++) {
-                for (char ltr = 'a'; ltr <= 'z'; ltr++) {
-                    temp.at(i) = ltr;
-                    string tempWord = temp.substr(0, i) + temp.at(i) + temp.substr(i + 1);
-                    if (ltr == 'z') {
-                        temp.at(i) = w1.at(i);  //reset index to original word letter
-                    }
-
-                    if (isInDictionary(tempWord, lex) && tempWord != w1) {
-                        // cout << tempWord << endl;
-                        Queue<Stack<string>> ladderQ = makeQueue(w1, tempWord, stackQueue);
-                    }
-                }
-            }
+            Vector<string> vec = findLadderWords(findAllCombinations(w1), lex, w1);
+            makeLadderQueue(vec,w1);
         }
+
     }
 
     return 0;
 }
+/*
+ * Creates a stack with the original word and
+ * a possible ladder word and then pushes the
+ * stacks onto a queue
+ */
+Queue<Stack<string>> makeLadderQueue(Vector<string> vec, string origWord) {
+    Queue<Stack<string>> ladderQ;
+    for (int i = 0; i < vec.size(); i++) {
+        Stack<string> stack;
+        stack.push(origWord);
+        stack.push(vec[i]);
+        ladderQ.enqueue(stack);
+    }
+//    cout << ladderQ << endl;
+    return ladderQ;
+}
+/*
+ * Returns a vector of all words one letter apart
+ * from original given word
+ */
+Vector<string> findLadderWords(Vector<string> vec, Lexicon lex, string w1) {
+    Vector<string> ladderWordVec;
+    for (int i = 0; i < vec.size(); i++) {
+        string possibleWord = vec[i];
+        if (isInDictionary(possibleWord, lex) && possibleWord != w1) {
+            string ladderWord = possibleWord;
+//            cout << ladderWord << endl;
+            ladderWordVec.add(ladderWord);
+        }
+    }
+    return ladderWordVec;
+}
+/*
+ * Returns vector of all possible letter combinations
+ * of given word.
+ */
+Vector<string> findAllCombinations(string w1) {
+    Vector<string> allCombinations;
+    string temp = w1;
+    for (size_t i = 0; i < w1.length(); i++) {
+        for (char ltr = 'a'; ltr <= 'z'; ltr++) {
+            temp.at(i) = ltr;
+            string tempWord = temp.substr(0, i) + temp.at(i) + temp.substr(i + 1);
+            allCombinations.add(tempWord);
+//            cout << tempWord << endl;
+            if (ltr == 'z') {
+                temp.at(i) = w1.at(i);  //reset index to original word letter
+
+            }
+        }
+    }
+//    cout << allCombinations << endl;
+    return allCombinations;
+}
+
 /*
  * If words are not the same length, are not found in the
  * dictionary, are not different, or a word is not entered
@@ -100,16 +143,6 @@ bool isInDictionary(string word, Lexicon dict) {
     }
     return true;
 }
-/*
- * Makes a new stack, pushes starting word onto stack,
- * pushes next word in word ladder onto stack,
- * then enqueues the stack
- */
-Queue<Stack<string>> makeQueue(string w1, string w2, Queue<Stack<string>> q) {
-    Stack<string> ladderStack;
-    ladderStack.push(w1);
-    ladderStack.push(w2);
-    q.enqueue(ladderStack);
-    return q;
-}
+
+
 
