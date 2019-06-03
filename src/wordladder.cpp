@@ -22,7 +22,8 @@ using namespace std;
  */
 bool wordChecker(string w1, string w2, Lexicon lex);
 bool isInDictionary(string word, Lexicon dict);
-string resetWord(char ch, string tempStr, string origStr, size_t i);
+Queue<Stack<string>> makeQueue(string w1, string w2, Queue<Stack<string>> q);
+
 
 int main() {
     cout << "Please give me two English words, and I will convert the" << endl;
@@ -39,22 +40,28 @@ int main() {
     while (true) {
         string w1 = getLine("Word 1 (or Enter to quit): ");
         string w2 = getLine("Word 2 (or Enter to quit): ");
-       if (w1.empty() || w2.empty()) {
+        if (w1.empty() || w2.empty()) {
             cout << "Have a nice day." << endl;
             break;
         }
-       else if (wordChecker(w1, w2, lex)) {
-           string temp = w1;
-           for (size_t i = 0; i < w1.length(); i++) {
+        else if (wordChecker(w1, w2, lex)) {
+            string temp = w1;
+            Queue<Stack<string>> stackQueue;
+            for (size_t i = 0; i < w1.length(); i++) {
                 for (char ltr = 'a'; ltr <= 'z'; ltr++) {
-                   temp.at(i) = ltr;
-                   cout <<  temp.substr(0, i) + temp.at(i) + temp.substr(i + 1) << endl;
-                   if (ltr == 'z') {
-                       temp.at(i) = w1.at(i);
-                   }
-               }
-           }
-       }
+                    temp.at(i) = ltr;
+                    string tempWord = temp.substr(0, i) + temp.at(i) + temp.substr(i + 1);
+                    if (ltr == 'z') {
+                        temp.at(i) = w1.at(i);  //reset index to original word letter
+                    }
+
+                    if (isInDictionary(tempWord, lex) && tempWord != w1) {
+                        // cout << tempWord << endl;
+                        Queue<Stack<string>> ladderQ = makeQueue(w1, tempWord, stackQueue);
+                    }
+                }
+            }
+        }
     }
 
     return 0;
@@ -70,8 +77,8 @@ bool wordChecker(string word1, string word2, Lexicon lex) {
         cout << "The two words must be the same length." << endl;
         cout << endl;
         return false;
-        }
-    else if (lex.contains(word1) || lex.contains(word2)) {
+    }
+    else if (!lex.contains(word1) || !lex.contains(word2)) {
         cout << "The two words must be found in the dictionary" << endl;
         cout << endl;
         return false;
@@ -93,14 +100,16 @@ bool isInDictionary(string word, Lexicon dict) {
     }
     return true;
 }
-
 /*
- * When word index reachs end of alphabet, 'z',
- * reset index to original letter
+ * Makes a new stack, pushes starting word onto stack,
+ * pushes next word in word ladder onto stack,
+ * then enqueues the stack
  */
-string resetWord(char ch, string tempStr, string origStr, size_t i) {
-    if (ch == 'z') {
-        tempStr.at(i) = origStr.at(i);
-    }
-    return tempStr;
+Queue<Stack<string>> makeQueue(string w1, string w2, Queue<Stack<string>> q) {
+    Stack<string> ladderStack;
+    ladderStack.push(w1);
+    ladderStack.push(w2);
+    q.enqueue(ladderStack);
+    return q;
 }
+
